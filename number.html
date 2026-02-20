@@ -7,6 +7,7 @@
             var guess = parseInt(document.getElementById("guess").value);
             var message = document.getElementById("message");
 
+            
             if (guess < 1 || guess > 100 || isNaN(guess)) {
                 message.innerHTML = "Please enter a valid number between 1 and 100.";
             } else {
