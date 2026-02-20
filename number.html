@@ -1,34 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Guess the No</title>
-    <script>
-        function checkGuess() {
-            var guess = parseInt(document.getElementById("guess").value);
-            var message = document.getElementById("message");
+<meta charset="UTF-8">
+<title>Neon Guess Game</title>
 
-            
-            if (guess < 1 || guess > 100 || isNaN(guess)) {
-                message.innerHTML = "Please enter a valid number between 1 and 100.";
-            } else {
-                var randomNumber = Math.floor(Math.random() * 100) + 1;
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at top, #050515, #000);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial;
+    color: #0ff;
+}
 
-                if (guess < randomNumber) {
-                    message.innerHTML = "Higher! Try again.";
-                } else if (guess > randomNumber) {
-                    message.innerHTML = "Lower! Try again.";
-                } else {
-                    message.innerHTML = "Congratulations! You guessed the number!";
-                }
-            }
-        }
-    </script>
+.card {
+    background: rgba(0,0,0,.7);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 0 20px #0ff, inset 0 0 10px #0ff;
+}
+
+h1 {
+    text-shadow: 0 0 10px #0ff;
+}
+
+input {
+    padding: 10px;
+    width: 200px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: black;
+    color: #0ff;
+    box-shadow: inset 0 0 8px #0ff;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    background: transparent;
+    color: #0ff;
+    box-shadow: 0 0 10px #0ff;
+    transition: .2s;
+}
+
+button:hover {
+    box-shadow: 0 0 25px #0ff;
+    transform: scale(1.05);
+}
+
+#message {
+    margin-top: 15px;
+    min-height: 25px;
+    text-shadow: 0 0 8px #0ff;
+}
+
+.counter {
+    margin-top: 10px;
+    color: #0ff;
+}
+</style>
 </head>
+
 <body>
-    <h1>Guess the Number</h1>
-    <p>Guess a number between 1 and 100:</p>
-    <input type="text" id="guess" />
+
+<div class="card">
+    <h1>⚡ Guess The Number</h1>
+
+    <p>Enter number between 1–100</p>
+
+    <input id="guess" type="number" placeholder="Your guess" />
+
+    <br>
+
     <button onclick="checkGuess()">Check</button>
-    <p id="message"></p>
+    <button onclick="resetGame()">Reset</button>
+
+    <div id="message"></div>
+    <div class="counter">Guesses: <span id="count">0</span></div>
+</div>
+
+<script>
+let secret = Math.floor(Math.random() * 100) + 1;
+let attempts = 0;
+
+function checkGuess() {
+    const input = document.getElementById("guess");
+    const msg = document.getElementById("message");
+    const count = document.getElementById("count");
+
+    let guess = Number(input.value);
+
+    if (!guess || guess < 1 || guess > 100) {
+        msg.innerHTML = "❌ Enter number 1–100";
+        return;
+    }
+
+    attempts++;
+    count.innerHTML = attempts;
+
+    if (guess < secret) {
+        msg.innerHTML = "⬆ Higher!";
+    }
+    else if (guess > secret) {
+        msg.innerHTML = "⬇ Lower!";
+    }
+    else {
+        msg.innerHTML = `🔥 YOU WON in ${attempts} tries!`;
+    }
+
+    input.value = "";
+    input.focus();
+}
+
+function resetGame() {
+    secret = Math.floor(Math.random() * 100) + 1;
+    attempts = 0;
+    document.getElementById("count").innerHTML = 0;
+    document.getElementById("message").innerHTML = "Game reset!";
+    document.getElementById("guess").value = "";
+}
+
+// Enter key support
+document.getElementById("guess").addEventListener("keyup", function(e){
+    if(e.key === "Enter") checkGuess();
+});
+</script>
+
 </body>
 </html>
