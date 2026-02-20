@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Neon Guess Game</title>
+<title>Ultimate Neon Guess Game</title>
 
 <style>
 body {
@@ -14,34 +14,37 @@ body {
     align-items: center;
     font-family: Arial;
     color: #0ff;
+    overflow: hidden;
 }
 
 .card {
-    background: rgba(0,0,0,.7);
+    background: rgba(0,0,0,.8);
     padding: 40px;
     border-radius: 20px;
     text-align: center;
-    box-shadow: 0 0 20px #0ff, inset 0 0 10px #0ff;
+    box-shadow: 0 0 25px #0ff, inset 0 0 15px #0ff;
+    z-index: 2;
 }
 
 h1 {
     text-shadow: 0 0 10px #0ff;
 }
 
-input {
+select, input {
     padding: 10px;
-    width: 200px;
-    font-size: 18px;
+    width: 220px;
+    font-size: 16px;
     border-radius: 10px;
     border: none;
     outline: none;
     background: black;
     color: #0ff;
-    box-shadow: inset 0 0 8px #0ff;
+    box-shadow: inset 0 0 10px #0ff;
+    margin-bottom: 10px;
 }
 
 button {
-    margin-top: 15px;
+    margin-top: 10px;
     padding: 10px 25px;
     font-size: 16px;
     border: none;
@@ -66,19 +69,34 @@ button:hover {
 
 .counter {
     margin-top: 10px;
-    color: #0ff;
+}
+
+/* Fireworks canvas */
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
 }
 </style>
 </head>
 
 <body>
 
+<canvas id="fireworks"></canvas>
+
 <div class="card">
-    <h1>⚡ Guess The Number</h1>
+    <h1>⚡ Neon Guess Game</h1>
 
-    <p>Enter number between 1–100</p>
+    <select id="difficulty" onchange="setDifficulty()">
+        <option value="100">Easy (1–100)</option>
+        <option value="500">Medium (1–500)</option>
+        <option value="1000">Hard (1–1000)</option>
+    </select>
 
-    <input id="guess" type="number" placeholder="Your guess" />
+    <br>
+
+    <input id="guess" type="number" placeholder="Enter your guess" />
 
     <br>
 
@@ -90,8 +108,18 @@ button:hover {
 </div>
 
 <script>
-let secret = Math.floor(Math.random() * 100) + 1;
+let maxRange = 100;
+let secret = generateNumber();
 let attempts = 0;
+
+function generateNumber() {
+    return Math.floor(Math.random() * maxRange) + 1;
+}
+
+function setDifficulty() {
+    maxRange = Number(document.getElementById("difficulty").value);
+    resetGame();
+}
 
 function checkGuess() {
     const input = document.getElementById("guess");
@@ -100,40 +128,101 @@ function checkGuess() {
 
     let guess = Number(input.value);
 
-    if (!guess || guess < 1 || guess > 100) {
-        msg.innerHTML = "❌ Enter number 1–100";
+    if (!guess || guess < 1 || guess > maxRange) {
+        msg.innerHTML = `❌ Enter number between 1 and ${maxRange}`;
         return;
     }
 
     attempts++;
     count.innerHTML = attempts;
 
+    let diff = Math.abs(secret - guess);
+
     if (guess < secret) {
-        msg.innerHTML = "⬆ Higher!";
+        msg.innerHTML = getHint(diff) + " ⬆ Go Higher!";
     }
     else if (guess > secret) {
-        msg.innerHTML = "⬇ Lower!";
+        msg.innerHTML = getHint(diff) + " ⬇ Go Lower!";
     }
     else {
-        msg.innerHTML = `🔥 YOU WON in ${attempts} tries!`;
+        msg.innerHTML = `🔥 YOU WON in ${attempts} guesses! 🎉`;
+        launchFireworks();
     }
 
     input.value = "";
-    input.focus();
+}
+
+function getHint(diff) {
+    if (diff === 0) return "";
+    if (diff <= 5) return "🔥 Extremely Close!";
+    if (diff <= 15) return "⚡ Very Close!";
+    if (diff <= 30) return "🙂 Close!";
+    if (diff <= 100) return "😐 Not Close";
+    return "🥶 Very Far!";
 }
 
 function resetGame() {
-    secret = Math.floor(Math.random() * 100) + 1;
+    secret = generateNumber();
     attempts = 0;
     document.getElementById("count").innerHTML = 0;
-    document.getElementById("message").innerHTML = "Game reset!";
+    document.getElementById("message").innerHTML = "Game reset. Try again!";
     document.getElementById("guess").value = "";
 }
 
-// Enter key support
 document.getElementById("guess").addEventListener("keyup", function(e){
     if(e.key === "Enter") checkGuess();
 });
+
+/* ================= FIREWORKS ================= */
+
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function launchFireworks() {
+    for(let i=0;i<80;i++){
+        createParticle();
+    }
+}
+
+function createParticle() {
+    const x = canvas.width / 2;
+    const y = canvas.height / 2;
+
+    const angle = Math.random() * 2 * Math.PI;
+    const speed = Math.random() * 6 + 2;
+
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed;
+
+    const color = `hsl(${Math.random()*360},100%,50%)`;
+
+    animateParticle(x, y, vx, vy, color);
+}
+
+function animateParticle(x, y, vx, vy, color) {
+    let life = 100;
+
+    function draw() {
+        if(life <= 0) return;
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI*2);
+        ctx.fill();
+
+        x += vx;
+        y += vy;
+        vy += 0.05; // gravity
+        life--;
+
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+}
 </script>
 
 </body>
